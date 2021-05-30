@@ -17,8 +17,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.apm29.phantomcompose.ui.route.Routes
 import com.apm29.phantomcompose.ui.theme.*
-import com.example.phantomcompose.ui.theme.*
-import com.example.phantomcompose.R
+import com.apm29.phantomcompose.R
 
 val dashboardRows: Array<Array<RouteCard>> = arrayOf(
     arrayOf(

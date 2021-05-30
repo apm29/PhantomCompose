@@ -1,22 +1,28 @@
 package com.apm29.phantomcompose.ui.sample
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.apm29.phantomcompose.ui.theme.Green600
 import java.util.*
@@ -31,37 +37,49 @@ enum class TodoStatus {
     CREATED, FINISHED, DELETED
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
-@Preview(backgroundColor = 0xFFFFFFFF, showBackground = true, widthDp = 480, heightDp = 320)
 @Composable
-fun TodoScreen() {
+fun TodoScreen(
+    todoList: List<Todo>,
+    currentEdit: Todo?,
+    onAdd: (String) -> Unit,
+    onChange: (Todo, TodoStatus) -> Unit,
+    onEditTodo: (Todo) -> Unit
+) {
     var value by rememberSaveable {
         mutableStateOf("")
     }
-    val todoList = remember {
-        mutableStateListOf(
-            *((0..30).map { Todo(it.toString()) }).toTypedArray()
-        )
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val onAddAction = {
+        onAdd(value)
+        value = ""
+        keyboardController?.hide()
     }
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        stickyHeader {
+        item(key="Header") {
             Box(
                 modifier = Modifier
                     .background(Color.White)
             ) {
                 OutlinedTextField(
                     value = value,
+                    maxLines = 1,
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = {
+                        onAddAction()
+                    }),
                     onValueChange = {
                         value = it
                     },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         IconButton(onClick = {
-                            createTodo(todoList, value)
-                            value = ""
+                            onAddAction()
                         }) {
                             Icon(imageVector = Icons.Filled.AddCircle, contentDescription = "add")
                         }
@@ -72,12 +90,11 @@ fun TodoScreen() {
                 )
             }
         }
-        items(todoList.filter { it.status != TodoStatus.DELETED }, key = { it.id }) { item ->
-            val index = todoList.indexOf(item)
-            TodoItems(item, todoList, index)
+        items(todoList, key = { it.id }) { item ->
+            TodoItems(item, currentEdit, onChange, onEditTodo)
         }
 
-        item {
+        item(key = "Footer") {
             Row(
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -99,76 +116,93 @@ fun TodoScreen() {
     }
 }
 
+@Stable
 @Composable
-private fun TodoItems(
+inline fun TodoItems(
     item: Todo,
-    todoList: SnapshotStateList<Todo>,
-    index: Int
+    currentEdit: Todo?,
+    crossinline onChange: (Todo, TodoStatus) -> Unit,
+    crossinline onEditTodo: (Todo) -> Unit
 ) {
     Card(
         elevation = 6.dp,
         modifier = Modifier.padding(3.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .defaultMinSize(minHeight = 48.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .animateContentSize()
         ) {
-            when (item.status) {
-                TodoStatus.CREATED -> {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = "todo",
-                        tint = MaterialTheme.colors.secondaryVariant
-                    )
-                    Text(text = item.task, modifier = Modifier.weight(1f))
-                    IconButton(
-                        onClick = {
-                            todoList[index] = item.copy(status = TodoStatus.FINISHED)
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Filled.Check, contentDescription = "todo")
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .defaultMinSize(minHeight = 48.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                when (item.status) {
+                    TodoStatus.CREATED -> {
+                        Icon(
+                            imageVector = Icons.Outlined.Circle,
+                            contentDescription = "todo",
+                            tint = MaterialTheme.colors.secondaryVariant
+                        )
+                    }
+                    TodoStatus.FINISHED -> {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "todo",
+                            tint = Green600
+                        )
+                    }
+                    TodoStatus.DELETED -> {
+                        Icon(
+                            imageVector = Icons.Filled.DeleteOutline,
+                            contentDescription = "todo",
+                            tint = MaterialTheme.colors.error
+                        )
                     }
                 }
-                TodoStatus.FINISHED -> {
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = "todo",
-                        tint = Green600
-                    )
-                    Text(text = item.task, modifier = Modifier.weight(1f))
-                    IconButton(
-                        onClick = {
-                            todoList[index] = item.copy(status = TodoStatus.DELETED)
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Filled.Close, contentDescription = "todo")
-                    }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(text = item.task)
+
+                IconButton(onClick = {
+                    onEditTodo(item)
+                }) {
+                    Icon(imageVector = Icons.Filled.Edit, contentDescription = "编辑")
                 }
-                TodoStatus.DELETED -> {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "todo",
-                        tint = MaterialTheme.colors.error
-                    )
-                    Text(text = item.task, modifier = Modifier.weight(1f))
-                    TextButton(onClick = {}, enabled = false) {
-                        Text(text = "已删除")
+
+            }
+
+            if (currentEdit == item) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = {
+                        onChange(item, TodoStatus.FINISHED)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircleOutline,
+                            contentDescription = "完成"
+                        )
+                    }
+
+                    IconButton(onClick = {
+                        onChange(item, TodoStatus.DELETED)
+                    }) {
+                        Icon(imageVector = Icons.Filled.DeleteOutline, contentDescription = "删除")
+                    }
+
+                    IconButton(onClick = {
+                        onChange(item, TodoStatus.CREATED)
+                    }) {
+                        Icon(imageVector = Icons.Outlined.Circle, contentDescription = "未完成")
                     }
                 }
             }
-
         }
-    }
-}
-
-private fun createTodo(
-    todoList: SnapshotStateList<Todo>,
-    value: String
-) {
-    if (value.isNotBlank()) {
-        todoList.add(Todo(task = value))
     }
 }
