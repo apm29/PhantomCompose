@@ -12,7 +12,7 @@ class TodoViewModel : ViewModel() {
 
 
     private val _todoList = mutableStateListOf(
-        *((0..10).map { Todo(it.toString()) }).toTypedArray()
+        *((0..10).map { Todo("待办事项$it") }).toTypedArray()
     )
 
     val todoList: List<Todo>

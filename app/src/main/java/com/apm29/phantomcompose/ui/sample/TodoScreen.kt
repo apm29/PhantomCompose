@@ -25,6 +25,7 @@ import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.apm29.phantomcompose.ui.theme.Green600
 import java.util.*
@@ -165,7 +166,11 @@ inline fun TodoItems(
             }
 
 
-            Text(text = item.task, modifier = Modifier.weight(1f))
+            Text(
+                text = item.task,
+                modifier = Modifier.weight(1f),
+                textDecoration = if(item.status == TodoStatus.DELETED) TextDecoration.LineThrough else null
+            )
 
             if (currentEdit == item) {
 
