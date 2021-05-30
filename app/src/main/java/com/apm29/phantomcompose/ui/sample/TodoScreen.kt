@@ -3,6 +3,7 @@ package com.apm29.phantomcompose.ui.sample
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +13,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.outlined.EditAttributes
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -61,7 +63,7 @@ fun TodoScreen(
         modifier = Modifier.padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item(key="Header") {
+        item(key = "Header") {
             Box(
                 modifier = Modifier
                     .background(Color.White)
@@ -128,79 +130,64 @@ inline fun TodoItems(
         elevation = 6.dp,
         modifier = Modifier.padding(3.dp)
     ) {
-        Column(
+        Row(
             Modifier
                 .fillMaxWidth()
-                .animateContentSize()
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .defaultMinSize(minHeight = 48.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                when (item.status) {
-                    TodoStatus.CREATED -> {
-                        Icon(
-                            imageVector = Icons.Outlined.Circle,
-                            contentDescription = "todo",
-                            tint = MaterialTheme.colors.secondaryVariant
-                        )
-                    }
-                    TodoStatus.FINISHED -> {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "todo",
-                            tint = Green600
-                        )
-                    }
-                    TodoStatus.DELETED -> {
-                        Icon(
-                            imageVector = Icons.Filled.DeleteOutline,
-                            contentDescription = "todo",
-                            tint = MaterialTheme.colors.error
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Text(text = item.task)
-
-                IconButton(onClick = {
+                .clickable {
                     onEditTodo(item)
-                }) {
-                    Icon(imageVector = Icons.Filled.Edit, contentDescription = "编辑")
                 }
-
+                .padding(16.dp)
+                .animateContentSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            when (item.status) {
+                TodoStatus.CREATED -> {
+                    Icon(
+                        imageVector = Icons.Outlined.Circle,
+                        contentDescription = "todo",
+                        tint = MaterialTheme.colors.secondaryVariant
+                    )
+                }
+                TodoStatus.FINISHED -> {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = "todo",
+                        tint = Green600
+                    )
+                }
+                TodoStatus.DELETED -> {
+                    Icon(
+                        imageVector = Icons.Filled.DeleteOutline,
+                        contentDescription = "todo",
+                        tint = MaterialTheme.colors.error
+                    )
+                }
             }
 
+
+            Text(text = item.task, modifier = Modifier.weight(1f))
+
             if (currentEdit == item) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    IconButton(onClick = {
-                        onChange(item, TodoStatus.FINISHED)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircleOutline,
-                            contentDescription = "完成"
-                        )
-                    }
 
-                    IconButton(onClick = {
-                        onChange(item, TodoStatus.DELETED)
-                    }) {
-                        Icon(imageVector = Icons.Filled.DeleteOutline, contentDescription = "删除")
-                    }
+                IconButton(onClick = {
+                    onChange(item, TodoStatus.FINISHED)
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircleOutline,
+                        contentDescription = "完成"
+                    )
+                }
 
-                    IconButton(onClick = {
-                        onChange(item, TodoStatus.CREATED)
-                    }) {
-                        Icon(imageVector = Icons.Outlined.Circle, contentDescription = "未完成")
-                    }
+                IconButton(onClick = {
+                    onChange(item, TodoStatus.DELETED)
+                }) {
+                    Icon(imageVector = Icons.Filled.DeleteOutline, contentDescription = "删除")
+                }
+
+                IconButton(onClick = {
+                    onChange(item, TodoStatus.CREATED)
+                }) {
+                    Icon(imageVector = Icons.Outlined.Circle, contentDescription = "未完成")
                 }
             }
         }

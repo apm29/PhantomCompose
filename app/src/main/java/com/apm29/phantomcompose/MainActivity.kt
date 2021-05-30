@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val todoViewModel : TodoViewModel by viewModels()
+        val todoViewModel: TodoViewModel by viewModels()
         setContent {
             val navController = rememberNavController()
             PhantomComposeTheme {
@@ -34,23 +34,29 @@ class MainActivity : ComponentActivity() {
                         DashboardScreen(navController)
                     }
                     composable(Routes.EnterRegister) {
-                        EnterRegisterScreen( )
+                        EnterRegisterScreen()
                     }
                     composable(Routes.LeaveRegister) {
-                        EnterRegisterScreen( )
+                        EnterRegisterScreen()
                     }
                     composable(Routes.Contact) {
                         EnterRegisterScreen()
                     }
                     composable(Routes.VisitRecords) {
-                        EnterRegisterScreen( )
+                        EnterRegisterScreen()
                     }
                     composable(Routes.VideoConf) {
                         EnterRegisterScreen()
                     }
                     composable(Routes.Settings) {
                         val todoList: List<Todo> = todoViewModel.todoList
-                        TodoScreen(todoList,todoViewModel.currentEdit,todoViewModel::addItem,todoViewModel::changeStatus,todoViewModel::editItem)
+                        TodoScreen(
+                            todoList,
+                            todoViewModel.currentEdit,
+                            todoViewModel::addItem,
+                            todoViewModel::changeStatus,
+                            todoViewModel::editItem
+                        )
                     }
                 }
             }
