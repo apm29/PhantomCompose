@@ -15,9 +15,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val navController = findNavController(R.id.nav_host_fragment)
+        findNavController(R.id.main_activity_fragment_container)
         doRequestPermissions {
-            navController.navigate(R.id.face_attr_preview_fragment)
+
         }
     }
 }

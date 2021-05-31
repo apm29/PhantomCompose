@@ -15,4 +15,9 @@
         android:label="compose"
         android:name="com.apm29.arcface.FaceAttrPreviewFragment">
     </fragment>
+    <fragment
+        android:id="@+id/face_preview_fragment"
+        android:label="compose"
+        android:name="com.apm29.phantomcompose.FacePreviewFragment">
+    </fragment>
 </navigation>

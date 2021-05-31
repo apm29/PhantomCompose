@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.fragment.findNavController
 import com.apm29.phantomcompose.route.Routes
 import com.apm29.phantomcompose.ui.contact.ContactsScreen
 import com.apm29.phantomcompose.ui.dashboard.DashboardScreen
@@ -26,7 +27,7 @@ import com.apm29.phantomcompose.vm.ContactViewModel
 import com.apm29.phantomcompose.vm.TodoViewModel
 import com.apm29.phantomcompose.vm.VisitorViewModel
 
-class ComposeFragment:Fragment() {
+class ComposeFragment : Fragment() {
 
     @ExperimentalComposeUiApi
     @ExperimentalFoundationApi
@@ -38,18 +39,26 @@ class ComposeFragment:Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             val todoViewModel: TodoViewModel by viewModels()
-            val enterRegisterViewModel: VisitorViewModel by viewModels{
+            val enterRegisterViewModel: VisitorViewModel by viewModels {
                 VisitorViewModel.EnterRegisterViewModelFactory()
             }
-            val contactViewModel: ContactViewModel by viewModels{
+            val contactViewModel: ContactViewModel by viewModels {
                 ContactViewModel.ContactsViewModelFactory()
             }
+            val fragmentNavController = findNavController()
             setContent {
                 val navController = rememberNavController()
                 PhantomComposeTheme {
                     NavHost(navController = navController, startDestination = Routes.Dashboard) {
                         composable(route = Routes.Dashboard) {
-                            DashboardScreen(navController)
+                            DashboardScreen(
+                                {
+                                    navController.navigate(it)
+                                },
+                                {
+                                    fragmentNavController.navigate(it)
+                                }
+                            )
                         }
                         composable(Routes.EnterRegister) {
                             EnterRegisterScreen(
@@ -65,7 +74,7 @@ class ComposeFragment:Fragment() {
                                 contactViewModel.contactRecords,
                                 contactViewModel.hasMoreContacts,
                                 contactViewModel.loadingContacts,
-                            ){
+                            ) {
                                 contactViewModel.getContacts()
                             }
                         }
@@ -74,7 +83,7 @@ class ComposeFragment:Fragment() {
                                 enterRegisterViewModel.visitorRecords,
                                 enterRegisterViewModel.hasMoreVisitRecords,
                                 enterRegisterViewModel.loadingVisitRecords,
-                            ){
+                            ) {
                                 enterRegisterViewModel.getVisitRecords()
                             }
                         }

@@ -3,10 +3,7 @@ package com.apm29.phantomcompose.ui.dashboard
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
@@ -75,14 +72,21 @@ data class RouteCard(
 @ExperimentalMaterialApi
 @Stable
 @Composable
-fun DashboardScreen(navController: NavController = rememberNavController()) {
+fun DashboardScreen(
+    onNavigateCompose: (String) -> Unit,
+    onNavigateFragment: (Int) -> Unit,
+) {
     BottomSheetScaffold(
         sheetContent = {
 
         },
         sheetPeekHeight = 0.dp,
         topBar = {
-            PhantomTopBar("智能访客系统")
+            PhantomTopBar("智能访客系统") {
+                TextButton(onClick = { onNavigateFragment(R.id.face_preview_fragment) }) {
+                    Text(text = "人脸识别")
+                }
+            }
         }
     ) {
         Column(
@@ -104,7 +108,7 @@ fun DashboardScreen(navController: NavController = rememberNavController()) {
                                 .weight(1F)
                                 .padding(18.dp, 18.dp)
                                 .clickable {
-                                    navController.navigate(it.route)
+                                    onNavigateCompose(it.route)
                                 }
                                 .fillMaxHeight(),
                             elevation = 6.dp
