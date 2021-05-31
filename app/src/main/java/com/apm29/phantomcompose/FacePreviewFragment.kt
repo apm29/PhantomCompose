@@ -86,7 +86,7 @@ class FacePreviewFragment : Fragment() {
                 )
             }
             items(faceSet) {
-                Text(text = faceSet.toString())
+                Text(text = it.toString())
             }
         }
     }

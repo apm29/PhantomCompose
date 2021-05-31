@@ -19,6 +19,7 @@ class FaceAttrViewModel : ViewModel() {
         face3dAngle: List<Face3DAngle>,
         livenessInfo: List<LivenessInfo>
     ) {
+        _faceSet.clear()
         _faceSet.addAll(
             faceInfo.mapIndexed { index, face ->
                 FaceCommonInfo(
