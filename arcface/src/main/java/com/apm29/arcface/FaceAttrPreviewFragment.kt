@@ -6,6 +6,7 @@ import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.apm29.arcface.model.DrawInfo
 import com.apm29.arcface.util.DrawHelper
@@ -22,6 +23,7 @@ import com.arcsoft.face.FaceEngine
 import com.arcsoft.face.ActiveFileInfo
 import com.arcsoft.face.enums.DetectFaceOrientPriority
 import kotlin.concurrent.thread
+import kotlin.reflect.KFunction0
 
 
 data class Size(
@@ -29,7 +31,15 @@ data class Size(
     var width: Int
 )
 
-class FaceAttrPreviewFragment : Fragment(R.layout.activity_face_attr_preview) {
+class FaceAttrPreviewFragment(
+    val onFaceInfo: (
+        List<FaceInfo>,
+        List<AgeInfo>,
+        List<GenderInfo>,
+        List<Face3DAngle>,
+        List<LivenessInfo>
+    ) -> Unit
+) : Fragment(R.layout.activity_face_attr_preview) {
 
     private val logTag = "FaceAttrPreviewActivity"
     private var cameraHelper: CameraHelper? = null
@@ -201,6 +211,14 @@ class FaceAttrPreviewFragment : Fragment(R.layout.activity_face_attr_preview) {
                     }
                     drawHelper?.draw(faceRectView, drawInfoList)
                 }
+                onFaceInfo(
+                    faceInfoList,
+                    ageInfoList,
+                    genderInfoList,
+                    face3DAngleList,
+                    faceLivenessInfoList
+                )
+
             }
 
             override fun onCameraClosed() {

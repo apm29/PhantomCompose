@@ -41,7 +41,8 @@ fun PhantomTopBar(
         ) {
             Row(
                 Modifier
-                    .height(48.dp)
+                    .height(48.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 if (onBack != null) {
                     Icon(
