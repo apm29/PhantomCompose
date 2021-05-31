@@ -13,43 +13,52 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.apm29.phantomcompose.ui.theme.Green300
 import com.apm29.phantomcompose.ui.theme.Orange300
 
 
 @Preview
 @Composable
-fun PhantomTopBar(title: String = "标题", onBack: (() -> Unit)? = null) {
-    Box(
-        Modifier
-            .fillMaxWidth()
+fun PhantomTopBar(
+    title: String = "标题",
+    onBack: (() -> Unit)? = null,
+    actions: (@Composable () -> Unit)? = null
+) {
+    Card(
+        modifier = Modifier,
+        shape = MaterialTheme.shapes.large,
+        elevation = 6.dp,
     ) {
-        Row(
+        Box(
             Modifier
-                .height(48.dp)
+                .fillMaxWidth()
         ) {
-            if (onBack != null) {
-                Icon(
-                    Icons.Filled.ChevronLeft,
-                    null,
-                    Modifier
-                        .clickable(onClick = onBack)
-                        .align(Alignment.CenterVertically)
-                        .size(36.dp)
-                        .padding(8.dp),
-                )
+            Row(
+                Modifier
+                    .height(48.dp)
+            ) {
+                if (onBack != null) {
+                    Icon(
+                        Icons.Filled.ChevronLeft,
+                        null,
+                        Modifier
+                            .clickable(onClick = onBack)
+                            .align(Alignment.CenterVertically)
+                            .size(36.dp)
+                            .padding(8.dp),
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                actions?.invoke()
             }
-            Spacer(Modifier.weight(1f))
+            Text(title, Modifier.align(Alignment.Center))
         }
-        Text(title, Modifier.align(Alignment.Center))
     }
 }
 
@@ -65,20 +74,19 @@ fun LabeledTextField(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = label, modifier = Modifier.defaultMinSize(90.dp))
-        TextField(
-            value = value?:"",
+        OutlinedTextField(
+            value = value ?: "",
             onValueChange = {
                 onValueChange?.invoke(it)
             },
             placeholder = {
                 Text(
-                    text = "请输入${label}", fontSize = 14.sp, modifier = Modifier
+                    text = "请输入${label}", fontSize = 12.sp, modifier = Modifier
                 )
             },
             modifier = Modifier
                 .weight(1f)
-                .padding(0.dp)
-                .background(Color.Transparent),
+                .padding(0.dp),
             singleLine = true,
         )
     }
@@ -107,7 +115,7 @@ fun VerticalDivider(
 
 
 @Composable
-inline fun <reified T,reified R> ItemPicker(
+inline fun <reified T, reified R> ItemPicker(
     label: String,
     value: R?,
     items: Array<T>,
@@ -116,9 +124,9 @@ inline fun <reified T,reified R> ItemPicker(
         it?.toString() ?: "请选择$label"
     },
     crossinline getItemValue: (T) -> R? = {
-        if(it is R){
+        if (it is R) {
             it
-        } else{
+        } else {
             null
         }
     },

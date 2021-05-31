@@ -12,10 +12,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.apm29.phantomcompose.ui.dashboard.DashboardScreen
 import com.apm29.phantomcompose.ui.register.EnterRegisterScreen
-import com.apm29.phantomcompose.ui.route.Routes
+import com.apm29.phantomcompose.route.Routes
 import com.apm29.phantomcompose.ui.sample.Todo
 import com.apm29.phantomcompose.ui.sample.TodoScreen
 import com.apm29.phantomcompose.ui.theme.PhantomComposeTheme
+import com.apm29.phantomcompose.ui.visitor.VisitorRecordScreen
+import com.apm29.phantomcompose.vm.EnterRegisterViewModel
 import com.apm29.phantomcompose.vm.TodoViewModel
 
 @ExperimentalFoundationApi
@@ -26,6 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val todoViewModel: TodoViewModel by viewModels()
+        val enterRegisterViewModel: EnterRegisterViewModel by viewModels()
         setContent {
             val navController = rememberNavController()
             PhantomComposeTheme {
@@ -34,19 +37,31 @@ class MainActivity : ComponentActivity() {
                         DashboardScreen(navController)
                     }
                     composable(Routes.EnterRegister) {
-                        EnterRegisterScreen()
+                        EnterRegisterScreen(
+                            enterRegisterViewModel::onSubmitRegister,
+                            enterRegisterViewModel::onReject
+                        )
                     }
                     composable(Routes.LeaveRegister) {
-                        EnterRegisterScreen()
+                        EnterRegisterScreen(
+                            enterRegisterViewModel::onSubmitRegister,
+                            enterRegisterViewModel::onReject
+                        )
                     }
                     composable(Routes.Contact) {
-                        EnterRegisterScreen()
+                        EnterRegisterScreen(
+                            enterRegisterViewModel::onSubmitRegister,
+                            enterRegisterViewModel::onReject
+                        )
                     }
                     composable(Routes.VisitRecords) {
-                        EnterRegisterScreen()
+                        VisitorRecordScreen()
                     }
                     composable(Routes.VideoConf) {
-                        EnterRegisterScreen()
+                        EnterRegisterScreen(
+                            enterRegisterViewModel::onSubmitRegister,
+                            enterRegisterViewModel::onReject
+                        )
                     }
                     composable(Routes.Settings) {
                         val todoList: List<Todo> = todoViewModel.todoList

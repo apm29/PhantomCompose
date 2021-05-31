@@ -3,26 +3,26 @@ package com.apm29.phantomcompose.ui.register
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.apm29.phantomcompose.model.Gender
+import com.apm29.phantomcompose.model.IntervieweeDetail
+import com.apm29.phantomcompose.model.VisitorDetail
 import com.apm29.phantomcompose.ui.theme.Green600
 import com.apm29.phantomcompose.ui.theme.Orange500
 import com.apm29.phantomcompose.widget.*
 import kotlinx.coroutines.launch
 
-@Preview(widthDp = 480, heightDp = 320)
 @ExperimentalMaterialApi
 @Composable
-fun EnterRegisterScreen() {
+fun EnterRegisterScreen(
+    onAgree: (VisitorDetail, IntervieweeDetail) -> Unit,
+    onReject: () -> Unit,
+) {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
     BottomSheetScaffold(
@@ -134,7 +134,28 @@ fun EnterRegisterScreen() {
                 }
             )
             VerticalDivider()
-            IntervieweeInfoForm(modifier = Modifier.weight(2f))
+            IntervieweeInfoForm(
+                modifier = Modifier.weight(2f),
+                onAgree = {
+                    onAgree(
+                        VisitorDetail(
+                            name,
+                            gender,
+                            idCard,
+                            phone,
+                            address,
+                            company,
+                            guestId,
+                            passId,
+                            count,
+                            reason,
+                            vehicleLicense
+                        ),
+                        IntervieweeDetail(it)
+                    )
+                },
+                onReject = onReject
+            )
         }
     }
 }
@@ -261,13 +282,14 @@ fun VisitorInfoForm(
 }
 
 
-@Preview(showBackground = true, backgroundColor = 0xffffff)
 @Composable
 fun IntervieweeInfoForm(
     modifier: Modifier = Modifier,
+    onAgree: (String) -> Unit,
+    onReject: () -> Unit,
 ) {
     var name by remember {
-        mutableStateOf(TextFieldValue())
+        mutableStateOf("")
     }
     Column(
         modifier = modifier
@@ -302,8 +324,7 @@ fun IntervieweeInfoForm(
             horizontalArrangement = Arrangement.Center
         ) {
             Button(
-                onClick = {
-                },
+                onClick = onReject,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Orange500,
                 )
@@ -313,6 +334,7 @@ fun IntervieweeInfoForm(
             Spacer(modifier = Modifier.width(5.dp))
             Button(
                 onClick = {
+                    onAgree(name)
                 },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Green600,

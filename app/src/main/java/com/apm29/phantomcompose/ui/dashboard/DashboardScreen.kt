@@ -3,7 +3,9 @@ package com.apm29.phantomcompose.ui.dashboard
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -15,9 +17,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.apm29.phantomcompose.ui.route.Routes
+import com.apm29.phantomcompose.route.Routes
 import com.apm29.phantomcompose.ui.theme.*
 import com.apm29.phantomcompose.R
+import com.apm29.phantomcompose.widget.PhantomTopBar
 
 val dashboardRows: Array<Array<RouteCard>> = arrayOf(
     arrayOf(
@@ -69,47 +72,60 @@ data class RouteCard(
     val icon: Int
 )
 
+@ExperimentalMaterialApi
 @Stable
 @Composable
 fun DashboardScreen(navController: NavController = rememberNavController()) {
-    Column(
-        modifier = Modifier.fillMaxSize()
+    BottomSheetScaffold(
+        sheetContent = {
+
+        },
+        sheetPeekHeight = 0.dp,
+        topBar = {
+            PhantomTopBar("智能访客系统")
+        }
     ) {
-        dashboardRows.forEach {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1F)
-                    .padding(0.dp, 30.dp)
-            ) {
-                it.forEach {
-                    Card(
-                        backgroundColor = it.color,
-                        modifier = Modifier
-                            .weight(1F)
-                            .padding(18.dp, 18.dp)
-                            .clickable {
-                                navController.navigate(it.route)
-                            }
-                            .fillMaxHeight(),
-                        elevation = 6.dp
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            dashboardRows.forEach {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1F)
+                        .padding(0.dp, 12.dp)
+                ) {
+                    it.forEach {
+                        Card(
+                            backgroundColor = it.color,
                             modifier = Modifier
-                                .padding(30.dp, 18.dp),
-                            horizontalArrangement = Arrangement.Center
+                                .weight(1F)
+                                .padding(18.dp, 18.dp)
+                                .clickable {
+                                    navController.navigate(it.route)
+                                }
+                                .fillMaxHeight(),
+                            elevation = 6.dp
                         ) {
-                            Image(
-                                imageVector = ImageVector.vectorResource(id = it.icon),
-                                contentDescription = null // decorative element
-                            )
-                            Text(text = it.name, color = Color.White)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(30.dp, 18.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Image(
+                                    imageVector = ImageVector.vectorResource(id = it.icon),
+                                    contentDescription = null // decorative element
+                                )
+                                Text(text = it.name, color = Color.White)
+                            }
                         }
                     }
                 }
             }
-        }
 
+        }
     }
 }

@@ -11,6 +11,9 @@ class EnterRegisterViewModel :ViewModel() {
 
     }
 
+    fun onReject(){
+
+    }
 
 
 

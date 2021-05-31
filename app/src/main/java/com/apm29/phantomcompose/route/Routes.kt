@@ -1,4 +1,4 @@
-package com.apm29.phantomcompose.ui.route
+package com.apm29.phantomcompose.route
 
 object Routes {
     const val Dashboard: String = "dashboard"
