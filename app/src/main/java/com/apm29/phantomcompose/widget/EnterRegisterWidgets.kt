@@ -28,7 +28,7 @@ import com.apm29.phantomcompose.ui.theme.Orange300
 fun PhantomTopBar(
     title: String = "标题",
     onBack: (() -> Unit)? = null,
-    actions: (@Composable () -> Unit)? = null
+    actions: (@Composable RowScope.() -> Unit)? = null
 ) {
     Card(
         modifier = Modifier,
@@ -55,7 +55,7 @@ fun PhantomTopBar(
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                actions?.invoke()
+                actions?.invoke(this)
             }
             Text(title, Modifier.align(Alignment.Center))
         }

@@ -28,7 +28,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val todoViewModel: TodoViewModel by viewModels()
-        val enterRegisterViewModel: EnterRegisterViewModel by viewModels()
+        val enterRegisterViewModel: EnterRegisterViewModel by viewModels{
+            EnterRegisterViewModel.EnterRegisterViewModelFactory()
+        }
         setContent {
             val navController = rememberNavController()
             PhantomComposeTheme {
@@ -55,7 +57,13 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(Routes.VisitRecords) {
-                        VisitorRecordScreen()
+                        VisitorRecordScreen(
+                            enterRegisterViewModel.visitorRecords,
+                            enterRegisterViewModel.hasMoreVisitRecords,
+                            enterRegisterViewModel.loadingVisitRecords,
+                        ){
+                            enterRegisterViewModel.getVisitRecords()
+                        }
                     }
                     composable(Routes.VideoConf) {
                         EnterRegisterScreen(
