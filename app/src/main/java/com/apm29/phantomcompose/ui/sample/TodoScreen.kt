@@ -64,7 +64,7 @@ fun TodoScreen(
         modifier = Modifier.padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item(key = "Header") {
+        stickyHeader (key = "Header") {
             Box(
                 modifier = Modifier
                     .background(Color.White)
@@ -92,12 +92,6 @@ fun TodoScreen(
                     }
                 )
             }
-        }
-        items(todoList, key = { it.id }) { item ->
-            TodoItems(item, currentEdit, onChange, onEditTodo)
-        }
-
-        item(key = "Footer") {
             Row(
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -116,6 +110,10 @@ fun TodoScreen(
                 )
             }
         }
+        items(todoList, key = { it.id }) { item ->
+            TodoItems(item, currentEdit, onChange, onEditTodo)
+        }
+
     }
 }
 
