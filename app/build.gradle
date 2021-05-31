@@ -67,4 +67,15 @@ dependencies {
     // liveData-compose
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
 
+    //Navigation
+    def nav_version = "2.3.5"
+    // Kotlin
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    // Feature module Support
+    implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
+
+    //permission
+    implementation 'com.permissionx.guolindev:permissionx:1.4.0'
+
 }

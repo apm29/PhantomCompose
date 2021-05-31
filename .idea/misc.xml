@@ -17,7 +17,8 @@
         <entry key="../../../../layout/compose-model-1622441165954.xml" value="0.32575757575757575" />
         <entry key="../../../../layout/custom_preview.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/baseline_exit_to_app_white_48dp.xml" value="0.27037037037037037" />
-        <entry key="arcface/src/main/res/layout/activity_face_attr_preview.xml" value="0.19680851063829788" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.19680851063829788" />
+        <entry key="arcface/src/main/res/layout/activity_face_attr_preview.xml" value="0.21458333333333332" />
       </map>
     </option>
   </component>

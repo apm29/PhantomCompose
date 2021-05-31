@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/compose_fragment"
+    android:id="@+id/main_navigation_graph">
+
+    <fragment
+        android:id="@+id/compose_fragment"
+        android:label="compose"
+        android:name="com.apm29.phantomcompose.ComposeFragment">
+    </fragment>
+
+    <fragment
+        android:id="@+id/face_attr_preview_fragment"
+        android:label="compose"
+        android:name="com.apm29.arcface.FaceAttrPreviewFragment">
+    </fragment>
+</navigation>

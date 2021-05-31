@@ -1,6 +1,7 @@
 package com.apm29.arcface.util.face;
 
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.arcsoft.face.FaceFeature;
 import com.arcsoft.face.LivenessInfo;

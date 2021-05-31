@@ -1,94 +1,23 @@
 package com.apm29.phantomcompose
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.apm29.phantomcompose.ui.dashboard.DashboardScreen
-import com.apm29.phantomcompose.ui.register.EnterRegisterScreen
-import com.apm29.phantomcompose.route.Routes
-import com.apm29.phantomcompose.ui.contact.ContactsScreen
-import com.apm29.phantomcompose.ui.register.LeaveRegisterScreen
-import com.apm29.phantomcompose.ui.sample.Todo
-import com.apm29.phantomcompose.ui.sample.TodoScreen
-import com.apm29.phantomcompose.ui.theme.PhantomComposeTheme
-import com.apm29.phantomcompose.ui.visitor.VisitorRecordScreen
-import com.apm29.phantomcompose.vm.ContactViewModel
-import com.apm29.phantomcompose.vm.VisitorViewModel
-import com.apm29.phantomcompose.vm.TodoViewModel
+import androidx.navigation.findNavController
+import com.apm29.phantomcompose.ext.doRequestPermissions
 
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val todoViewModel: TodoViewModel by viewModels()
-        val enterRegisterViewModel: VisitorViewModel by viewModels{
-            VisitorViewModel.EnterRegisterViewModelFactory()
-        }
-        val contactViewModel: ContactViewModel by viewModels{
-            ContactViewModel.ContactsViewModelFactory()
-        }
-        setContent {
-            val navController = rememberNavController()
-            PhantomComposeTheme {
-                NavHost(navController = navController, startDestination = Routes.Dashboard) {
-                    composable(route = Routes.Dashboard) {
-                        DashboardScreen(navController)
-                    }
-                    composable(Routes.EnterRegister) {
-                        EnterRegisterScreen(
-                            enterRegisterViewModel::onSubmitRegister,
-                            enterRegisterViewModel::onReject
-                        )
-                    }
-                    composable(Routes.LeaveRegister) {
-                        LeaveRegisterScreen()
-                    }
-                    composable(Routes.Contact) {
-                        ContactsScreen(
-                            contactViewModel.contactRecords,
-                            contactViewModel.hasMoreContacts,
-                            contactViewModel.loadingContacts,
-                        ){
-                            contactViewModel.getContacts()
-                        }
-                    }
-                    composable(Routes.VisitRecords) {
-                        VisitorRecordScreen(
-                            enterRegisterViewModel.visitorRecords,
-                            enterRegisterViewModel.hasMoreVisitRecords,
-                            enterRegisterViewModel.loadingVisitRecords,
-                        ){
-                            enterRegisterViewModel.getVisitRecords()
-                        }
-                    }
-                    composable(Routes.VideoConf) {
-                        EnterRegisterScreen(
-                            enterRegisterViewModel::onSubmitRegister,
-                            enterRegisterViewModel::onReject
-                        )
-                    }
-                    composable(Routes.Settings) {
-                        val todoList: List<Todo> = todoViewModel.todoList
-                        TodoScreen(
-                            todoList,
-                            todoViewModel.currentEdit,
-                            todoViewModel::addItem,
-                            todoViewModel::changeStatus,
-                            todoViewModel::editItem
-                        )
-                    }
-                }
-            }
+        setContentView(R.layout.activity_main)
+        val navController = findNavController(R.id.nav_host_fragment)
+        doRequestPermissions {
+            navController.navigate(R.id.face_attr_preview_fragment)
         }
     }
 }
