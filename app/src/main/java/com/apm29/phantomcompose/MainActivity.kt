@@ -13,11 +13,14 @@ import androidx.navigation.compose.rememberNavController
 import com.apm29.phantomcompose.ui.dashboard.DashboardScreen
 import com.apm29.phantomcompose.ui.register.EnterRegisterScreen
 import com.apm29.phantomcompose.route.Routes
+import com.apm29.phantomcompose.ui.contact.ContactsScreen
+import com.apm29.phantomcompose.ui.register.LeaveRegisterScreen
 import com.apm29.phantomcompose.ui.sample.Todo
 import com.apm29.phantomcompose.ui.sample.TodoScreen
 import com.apm29.phantomcompose.ui.theme.PhantomComposeTheme
 import com.apm29.phantomcompose.ui.visitor.VisitorRecordScreen
-import com.apm29.phantomcompose.vm.EnterRegisterViewModel
+import com.apm29.phantomcompose.vm.ContactViewModel
+import com.apm29.phantomcompose.vm.VisitorViewModel
 import com.apm29.phantomcompose.vm.TodoViewModel
 
 @ExperimentalFoundationApi
@@ -28,8 +31,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val todoViewModel: TodoViewModel by viewModels()
-        val enterRegisterViewModel: EnterRegisterViewModel by viewModels{
-            EnterRegisterViewModel.EnterRegisterViewModelFactory()
+        val enterRegisterViewModel: VisitorViewModel by viewModels{
+            VisitorViewModel.EnterRegisterViewModelFactory()
+        }
+        val contactViewModel: ContactViewModel by viewModels{
+            ContactViewModel.ContactsViewModelFactory()
         }
         setContent {
             val navController = rememberNavController()
@@ -45,16 +51,16 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(Routes.LeaveRegister) {
-                        EnterRegisterScreen(
-                            enterRegisterViewModel::onSubmitRegister,
-                            enterRegisterViewModel::onReject
-                        )
+                        LeaveRegisterScreen()
                     }
                     composable(Routes.Contact) {
-                        EnterRegisterScreen(
-                            enterRegisterViewModel::onSubmitRegister,
-                            enterRegisterViewModel::onReject
-                        )
+                        ContactsScreen(
+                            contactViewModel.contactRecords,
+                            contactViewModel.hasMoreContacts,
+                            contactViewModel.loadingContacts,
+                        ){
+                            contactViewModel.getContacts()
+                        }
                     }
                     composable(Routes.VisitRecords) {
                         VisitorRecordScreen(

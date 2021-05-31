@@ -11,7 +11,7 @@ import com.apm29.phantomcompose.model.VisitRecord
 import com.apm29.phantomcompose.model.VisitorDetail
 import com.apm29.phantomcompose.repo.VisitorRepository
 
-class EnterRegisterViewModel(private val visitorRepository: VisitorRepository) : ViewModel() {
+class VisitorViewModel(private val visitorRepository: VisitorRepository) : ViewModel() {
 
     //提交访客、受访人信息
     fun onSubmitRegister(visitorDetail: VisitorDetail, intervieweeDetail: IntervieweeDetail) {
@@ -54,8 +54,8 @@ class EnterRegisterViewModel(private val visitorRepository: VisitorRepository) :
     @Suppress("UNCHECKED_CAST")
     class EnterRegisterViewModelFactory : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(EnterRegisterViewModel::class.java)) {
-                return EnterRegisterViewModel(VisitorRepository) as T
+            if (modelClass.isAssignableFrom(VisitorViewModel::class.java)) {
+                return VisitorViewModel(VisitorRepository) as T
             } else {
                 throw IllegalArgumentException("Unknown ViewModel class")
             }

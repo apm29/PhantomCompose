@@ -67,9 +67,6 @@ fun VisitorRecordScreen(
                     )
                 }
             }
-            stickyHeader {
-                Divider()
-            }
 
             items(records) { visitRecord ->
                 VisitRecordItem(visitRecord)
