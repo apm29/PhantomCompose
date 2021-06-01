@@ -55,84 +55,89 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                var loading: Boolean by remember {
-                    mutableStateOf(false)
-                }
+                FacePreviewScreen()
+            }
+        }
+    }
 
-                var showResultDialog by remember {
-                    mutableStateOf(false)
-                }
+    @ExperimentalFoundationApi
+    @Composable
+    private fun FacePreviewScreen() {
+        var loading: Boolean by remember {
+            mutableStateOf(false)
+        }
 
-                var result by remember {
-                    mutableStateOf<IdcardMsg?>(null)
-                }
+        var showResultDialog by remember {
+            mutableStateOf(false)
+        }
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Row {
-                        val modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(1f)
-                        FaceInfoList(modifier, faceAttrViewModel.faceSet, readIdCard = {
-                            launch(coroutineIoContext) {
-                                loading = true
-                                result = idCardFragment.checkIdCard()
-                                delay(1000)
-                                loading = false
-                                showResultDialog = true
+        var result by remember {
+            mutableStateOf<IdcardMsg?>(null)
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row {
+                val modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                FaceInfoList(modifier, faceAttrViewModel.faceSet, readIdCard = {
+                    launch(coroutineIoContext) {
+                        loading = true
+                        result = idCardFragment.checkIdCard()
+                        delay(1000)
+                        loading = false
+                        showResultDialog = true
+                    }
+                })
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(
+                            1.2f,
+                            true
+                        ),
+                    factory = { context ->
+                        FrameLayout(context).apply {
+                            id = R.id.id_fragment_face_preview
+                            childFragmentManager.commit {
+                                add(R.id.id_fragment_face_preview, faceAttrPreviewFragment)
                             }
-                        })
-                        AndroidView(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .aspectRatio(
-                                    1.2f,
-                                    true
-                                ),
-                            factory = { context ->
-                                FrameLayout(context).apply {
-                                    id = R.id.id_fragment_face_preview
-                                    childFragmentManager.commit {
-                                        add(R.id.id_fragment_face_preview, faceAttrPreviewFragment)
-                                    }
-                                }
-                            },
-                        )
-                        AndroidView(
-                            modifier = Modifier
-                                .width(0.dp)
-                                .height(0.dp),
-                            factory = { context ->
-                                // Creates custom view
-                                FrameLayout(context).apply {
-                                    id = R.id.id_fragment_id_card_detect
-                                    childFragmentManager.commit {
-                                        add(R.id.id_fragment_id_card_detect, idCardFragment)
-                                    }
-                                }
-                            },
-                        )
-                    }
-                    if (loading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-
-                    if (showResultDialog) {
-                        AlertDialog(
-                            modifier = Modifier.widthIn(180.dp),
-                            onDismissRequest = { showResultDialog = false },
-                            buttons = {},
-                            title = {
-                                Text(
-                                    text = "识别结果"
-                                )
-                            },
-                            text = {
-                                Text("$result")
+                        }
+                    },
+                )
+                AndroidView(
+                    modifier = Modifier
+                        .width(0.dp)
+                        .height(0.dp),
+                    factory = { context ->
+                        // Creates custom view
+                        FrameLayout(context).apply {
+                            id = R.id.id_fragment_id_card_detect
+                            childFragmentManager.commit {
+                                add(R.id.id_fragment_id_card_detect, idCardFragment)
                             }
-                        )
-                    }
-                }
+                        }
+                    },
+                )
+            }
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
 
+            if (showResultDialog) {
+                AlertDialog(
+                    modifier = Modifier.widthIn(180.dp),
+                    onDismissRequest = { showResultDialog = false },
+                    buttons = {},
+                    title = {
+                        Text(
+                            text = "识别结果"
+                        )
+                    },
+                    text = {
+                        Text("$result")
+                    }
+                )
             }
         }
     }
