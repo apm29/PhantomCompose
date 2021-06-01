@@ -7,11 +7,16 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraEnhance
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -22,15 +27,24 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import com.apm29.arcface.FaceAttrPreviewFragment
+import com.apm29.phantomcompose.ext.CoroutineScopeContext
 import com.apm29.phantomcompose.model.FaceCommonInfo
 import com.apm29.phantomcompose.vm.FaceAttrViewModel
+import com.apm29.telpo.IdCardFragment
+import com.telpo.servicelibrary.IdcardMsg
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class FacePreviewFragment : Fragment() {
+class FacePreviewFragment : Fragment(), CoroutineScopeContext {
 
     private val faceAttrViewModel: FaceAttrViewModel by viewModels()
 
     private val faceAttrPreviewFragment by lazy {
         FaceAttrPreviewFragment(faceAttrViewModel::onFaceInfoGet)
+    }
+
+    private val idCardFragment by lazy {
+        IdCardFragment()
     }
 
     @ExperimentalFoundationApi
@@ -41,21 +55,40 @@ class FacePreviewFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
+                var loading: Boolean by remember {
+                    mutableStateOf(false)
+                }
+
+                var showResultDialog by remember {
+                    mutableStateOf(false)
+                }
+
+                var result by remember {
+                    mutableStateOf<IdcardMsg?>(null)
+                }
+
                 Box(modifier = Modifier.fillMaxSize()) {
                     Row {
                         val modifier = Modifier
                             .fillMaxHeight()
                             .weight(1f)
-                        FaceInfoList(modifier, faceAttrViewModel.faceSet)
+                        FaceInfoList(modifier, faceAttrViewModel.faceSet, readIdCard = {
+                            launch(coroutineIoContext) {
+                                loading = true
+                                result = idCardFragment.checkIdCard()
+                                delay(1000)
+                                loading = false
+                                showResultDialog = true
+                            }
+                        })
                         AndroidView(
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .aspectRatio(
                                     1.2f,
                                     true
-                                ), // Occupy the max size in the Compose UI tree
+                                ),
                             factory = { context ->
-                                // Creates custom view
                                 FrameLayout(context).apply {
                                     id = R.id.id_fragment_face_preview
                                     childFragmentManager.commit {
@@ -64,30 +97,125 @@ class FacePreviewFragment : Fragment() {
                                 }
                             },
                         )
+                        AndroidView(
+                            modifier = Modifier
+                                .width(0.dp)
+                                .height(0.dp),
+                            factory = { context ->
+                                // Creates custom view
+                                FrameLayout(context).apply {
+                                    id = R.id.id_fragment_id_card_detect
+                                    childFragmentManager.commit {
+                                        add(R.id.id_fragment_id_card_detect, idCardFragment)
+                                    }
+                                }
+                            },
+                        )
                     }
-                    //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    if (loading) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+
+                    if (showResultDialog) {
+                        AlertDialog(
+                            modifier = Modifier.widthIn(180.dp),
+                            onDismissRequest = { showResultDialog = false },
+                            buttons = {},
+                            title = {
+                                Text(
+                                    text = "识别结果"
+                                )
+                            },
+                            text = {
+                                Text("$result")
+                            }
+                        )
+                    }
                 }
+
             }
         }
     }
 
     @ExperimentalFoundationApi
     @Composable
-    private fun FaceInfoList(modifier: Modifier, faceSet: List<FaceCommonInfo>) {
-        LazyColumn(
+    private fun FaceInfoList(
+        modifier: Modifier,
+        faceSet: List<FaceCommonInfo>,
+        captureFace: ((FaceCommonInfo) -> Unit)? = null,
+        readIdCard: (() -> Unit)? = null
+    ) {
+        Column(
             modifier = modifier
-                .background(color = Color.LightGray)
         ) {
-            stickyHeader {
-                Text(
-                    text = "人脸信息",
-                    modifier = Modifier.fillMaxWidth().padding(12.dp),
-                    textAlign = TextAlign.Center
-                )
+            LazyColumn(
+                modifier = Modifier
+                    .background(color = Color.LightGray)
+                    .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                stickyHeader {
+                    Text(
+                        text = "人脸信息",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                items(faceSet) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                captureFace?.invoke(it)
+                            }
+                            .padding(4.dp),
+                        elevation = 5.dp
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = it.toString(), modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.CameraEnhance,
+                                contentDescription = "拍照",
+                                tint = Color.Green,
+                                modifier = Modifier.padding(6.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (faceSet.isNullOrEmpty()) {
+                    item {
+                        Text(
+                            text = "未检测到人脸",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
             }
-            items(faceSet) {
-                Text(text = it.toString())
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = {
+                    readIdCard?.invoke()
+                },
+                shape = RoundedCornerShape(0.dp)
+            ) {
+                Text(text = "读取身份证信息")
             }
+
         }
+
     }
 }

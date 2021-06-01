@@ -84,7 +84,7 @@ fun DashboardScreen(
         topBar = {
             PhantomTopBar("智能访客系统") {
                 TextButton(onClick = { onNavigateFragment(R.id.face_preview_fragment) }) {
-                    Text(text = "人脸识别")
+                    Text(text = "人证比对")
                 }
             }
         }

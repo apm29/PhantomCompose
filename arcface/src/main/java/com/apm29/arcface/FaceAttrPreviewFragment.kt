@@ -5,8 +5,9 @@ import android.graphics.Point
 import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
+import android.view.Surface
 import android.view.View
-import androidx.activity.OnBackPressedCallback
+import android.view.ViewTreeObserver
 import androidx.fragment.app.Fragment
 import com.apm29.arcface.model.DrawInfo
 import com.apm29.arcface.util.DrawHelper
@@ -15,21 +16,13 @@ import com.apm29.arcface.util.camera.CameraListener
 import com.apm29.arcface.util.face.RecognizeColor
 import com.apm29.arcface.widget.FaceRectView
 import com.arcsoft.face.*
-import com.arcsoft.face.enums.DetectMode
-import com.arcsoft.face.ErrorInfo
-
-import com.arcsoft.face.FaceEngine
-
-import com.arcsoft.face.ActiveFileInfo
 import com.arcsoft.face.enums.DetectFaceOrientPriority
-import kotlin.concurrent.thread
-import kotlin.reflect.KFunction0
+import com.arcsoft.face.enums.DetectMode
+import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import kotlin.collections.ArrayList
 
-
-data class Size(
-    var height: Int,
-    var width: Int
-)
 
 class FaceAttrPreviewFragment(
     val onFaceInfo: (
@@ -39,7 +32,7 @@ class FaceAttrPreviewFragment(
         List<Face3DAngle>,
         List<LivenessInfo>
     ) -> Unit
-) : Fragment(R.layout.activity_face_attr_preview) {
+) : Fragment(R.layout.activity_face_attr_preview), FaceCommand {
 
     private val logTag = "FaceAttrPreviewActivity"
     private var cameraHelper: CameraHelper? = null
@@ -56,12 +49,22 @@ class FaceAttrPreviewFragment(
     private lateinit var previewView: View
     private lateinit var faceRectView: FaceRectView
 
+    private val faceNv21Queue: BlockingQueue<Pair<Int, ByteArray?>> = ArrayBlockingQueue(30, true)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Activity启动后就锁定为启动时的方向
         previewView = view.findViewById(R.id.texture_preview)
         faceRectView = view.findViewById(R.id.face_rect_view)
-        activeEngine()
+
+        previewView.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                previewView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                activeEngine()
+            }
+        })
+
     }
 
 
@@ -85,10 +88,7 @@ class FaceAttrPreviewFragment(
         if (res == ErrorInfo.MOK) {
             Log.i(logTag, activeFileInfo.toString())
             initEngine()
-            thread {
-                Thread.sleep(300)
-                initCamera()
-            }
+            initCamera()
         }
     }
 
@@ -173,12 +173,12 @@ class FaceAttrPreviewFragment(
                         faceInfoList,
                         processMask
                     )
-                    Log.e(logTag, faceInfoList.toString())
                     if (code != ErrorInfo.MOK) {
-                        Log.e(logTag, "检测失败")
+                        sendEmptyFaces()
                         return
                     }
                 } else {
+                    sendEmptyFaces()
                     return
                 }
                 val ageInfoList: List<AgeInfo> = ArrayList()
@@ -191,11 +191,8 @@ class FaceAttrPreviewFragment(
                 val livenessCode = faceEngine.getLiveness(faceLivenessInfoList)
 
                 // 有其中一个的错误码不为ErrorInfo.MOK，return
-                Log.e(
-                    logTag,
-                    "ageCode:$ageCode, genderCode:$genderCode, face3DAngleCode:$face3DAngleCode, livenessCode:$livenessCode"
-                )
                 if (ageCode != ErrorInfo.MOK || genderCode != ErrorInfo.MOK || face3DAngleCode != ErrorInfo.MOK || livenessCode != ErrorInfo.MOK) {
+                    sendEmptyFaces()
                     return
                 }
                 if (drawHelper != null) {
@@ -218,7 +215,17 @@ class FaceAttrPreviewFragment(
                     face3DAngleList,
                     faceLivenessInfoList
                 )
+                //faceNv21Queue.put(faceInfoList.first().faceId to nv21)
+            }
 
+            private fun sendEmptyFaces() {
+                onFaceInfo(
+                    arrayListOf(),
+                    arrayListOf(),
+                    arrayListOf(),
+                    arrayListOf(),
+                    arrayListOf()
+                )
             }
 
             override fun onCameraClosed() {
@@ -238,7 +245,7 @@ class FaceAttrPreviewFragment(
         }
         cameraHelper = CameraHelper.Builder()
             .previewViewSize(Point(previewView.measuredWidth, previewView.measuredHeight))
-            .rotation(requireActivity().windowManager.defaultDisplay.rotation)
+            .rotation(Surface.ROTATION_270)
             .specificCameraId(Camera.CameraInfo.CAMERA_FACING_BACK)
             .isMirror(false)
             .previewOn(previewView)
@@ -246,5 +253,9 @@ class FaceAttrPreviewFragment(
             .build()
         cameraHelper?.init()
         cameraHelper?.start()
+    }
+
+    override fun commandCapture(id: Int) {
+
     }
 }
