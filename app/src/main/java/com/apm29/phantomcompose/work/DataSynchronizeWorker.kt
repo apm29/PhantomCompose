@@ -3,29 +3,29 @@ package com.apm29.phantomcompose.work
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.work.Worker
+import androidx.hilt.work.HiltWorker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.apm29.phantomcompose.api.TestApi
-import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
-class DataSynchronizeWorker(context: Context, workParameters: WorkerParameters) :
-    Worker(context, workParameters) {
-
-    @Inject
-    lateinit var testApi: TestApi
+@HiltWorker
+class DataSynchronizeWorker  @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted workParameters: WorkerParameters,
+    private val testApi: TestApi
+) : CoroutineWorker(context, workParameters) {
 
     init {
-        Log.e(TAG,"INIT")
+        Log.e(TAG, "INIT")
     }
 
-    override fun doWork(): Result {
-        Log.e(TAG,"START")
-        runBlocking {
-            val res = testApi.test()
-            toastAndLog(res.toString())
-        }
-        Log.e(TAG,"FINISH")
+    override suspend fun doWork(): Result {
+        Log.e(TAG, "START")
+        val res = testApi.test()
+        toastAndLog(res.toString())
+        Log.e(TAG, "FINISH")
         return Result.success()
     }
 
