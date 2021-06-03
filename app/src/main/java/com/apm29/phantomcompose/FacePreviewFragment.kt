@@ -47,6 +47,7 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
         IdCardFragment()
     }
 
+    @ExperimentalMaterialApi
     @ExperimentalFoundationApi
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +61,7 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
         }
     }
 
+    @ExperimentalMaterialApi
     @ExperimentalFoundationApi
     @Composable
     private fun FacePreviewScreen() {
@@ -142,6 +144,7 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
         }
     }
 
+    @ExperimentalMaterialApi
     @ExperimentalFoundationApi
     @Composable
     private fun FaceInfoList(
@@ -172,11 +175,11 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                captureFace?.invoke(it)
-                            }
                             .padding(4.dp),
-                        elevation = 5.dp
+                        elevation = 5.dp,
+                        onClick = {
+                            captureFace?.invoke(it)
+                        }
                     ) {
                         Row(
                             modifier = Modifier

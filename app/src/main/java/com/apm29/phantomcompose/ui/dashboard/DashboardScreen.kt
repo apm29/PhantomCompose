@@ -1,8 +1,10 @@
 package com.apm29.phantomcompose.ui.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -101,17 +103,15 @@ fun DashboardScreen(
                         .weight(1F)
                         .padding(0.dp, 12.dp)
                 ) {
-                    it.forEach {
+                    it.forEach { routeCard ->
                         Card(
-                            backgroundColor = it.color,
+                            backgroundColor = routeCard.color,
                             modifier = Modifier
                                 .weight(1F)
                                 .padding(18.dp, 18.dp)
-                                .clickable {
-                                    onNavigateCompose(it.route)
-                                }
                                 .fillMaxHeight(),
-                            elevation = 6.dp
+                            elevation = 6.dp,
+                            onClick = {onNavigateCompose(routeCard.route)}
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -120,10 +120,10 @@ fun DashboardScreen(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 Image(
-                                    imageVector = ImageVector.vectorResource(id = it.icon),
+                                    imageVector = ImageVector.vectorResource(id = routeCard.icon),
                                     contentDescription = null // decorative element
                                 )
-                                Text(text = it.name, color = Color.White)
+                                Text(text = routeCard.name, color = Color.White)
                             }
                         }
                     }

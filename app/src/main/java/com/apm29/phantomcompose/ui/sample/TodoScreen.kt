@@ -45,10 +45,8 @@ enum class TodoStatus {
 @Composable
 fun TodoScreen(
     todoList: List<Todo>,
-    currentEdit: Todo?,
     onAdd: (String) -> Unit,
     onChange: (Todo, TodoStatus) -> Unit,
-    onEditTodo: (Todo) -> Unit
 ) {
     var value by rememberSaveable {
         mutableStateOf("")
@@ -59,6 +57,9 @@ fun TodoScreen(
         onAdd(value)
         value = ""
         keyboardController?.hide()
+    }
+    var currentEdit:Todo? by remember {
+        mutableStateOf(null)
     }
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -111,7 +112,9 @@ fun TodoScreen(
             }
         }
         items(todoList, key = { it.id }) { item ->
-            TodoItems(item, currentEdit, onChange, onEditTodo)
+            TodoItems(item, currentEdit, onChange, {
+                currentEdit = it
+            })
         }
 
     }

@@ -7,9 +7,12 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.findNavController
 import com.apm29.phantomcompose.ext.doRequestPermissions
+import com.apm29.phantomcompose.work.ContactOperations
+import dagger.hilt.android.AndroidEntryPoint
 
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,7 +20,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         findNavController(R.id.main_activity_fragment_container)
         doRequestPermissions {
-
         }
+
+        ContactOperations(0L).startSync(this)
     }
 }

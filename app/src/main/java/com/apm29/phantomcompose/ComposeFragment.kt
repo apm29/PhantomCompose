@@ -97,10 +97,8 @@ class ComposeFragment : Fragment() {
                             val todoList: List<Todo> = todoViewModel.todoList
                             TodoScreen(
                                 todoList,
-                                todoViewModel.currentEdit,
                                 todoViewModel::addItem,
                                 todoViewModel::changeStatus,
-                                todoViewModel::editItem
                             )
                         }
                     }
