@@ -7,7 +7,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.findNavController
 import com.apm29.phantomcompose.ext.doRequestPermissions
-import com.apm29.phantomcompose.work.ContactOperations
+import com.apm29.phantomcompose.work.operation.ContactOperations
 import dagger.hilt.android.AndroidEntryPoint
 
 @ExperimentalFoundationApi

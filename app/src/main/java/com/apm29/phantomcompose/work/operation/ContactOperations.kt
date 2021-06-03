@@ -1,7 +1,9 @@
-package com.apm29.phantomcompose.work
+package com.apm29.phantomcompose.work.operation
 
 import android.content.Context
 import androidx.work.*
+import com.apm29.phantomcompose.work.Constants
+import com.apm29.phantomcompose.work.worker.DataSynchronizeWorker
 import java.time.Duration
 
 class ContactOperations(
@@ -11,10 +13,10 @@ class ContactOperations(
 
     private val periodicWorkRequest: PeriodicWorkRequest =
         PeriodicWorkRequestBuilder<DataSynchronizeWorker>(
-            repeatInterval = Duration.ofSeconds(120),
-            flexTimeInterval = Duration.ofSeconds(40)
+            repeatInterval = Duration.ofSeconds(50),
+            flexTimeInterval = Duration.ofSeconds(30)
         ).setInputData(coreData)
-            .setBackoffCriteria(BackoffPolicy.LINEAR, Duration.ofSeconds(20))//每次重试间隔N*20sec
+            .setBackoffCriteria(BackoffPolicy.LINEAR, Duration.ofSeconds(10))//每次重试间隔N*20sec
             .build()
 
 
