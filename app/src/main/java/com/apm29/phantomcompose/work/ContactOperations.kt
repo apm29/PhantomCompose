@@ -14,11 +14,6 @@ class ContactOperations(
             repeatInterval = Duration.ofSeconds(120),
             flexTimeInterval = Duration.ofSeconds(40)
         ).setInputData(coreData)
-            .setInitialDelay(Duration.ofSeconds(30))
-            .setConstraints(
-                Constraints.Builder()
-                    .build()
-            )
             .setBackoffCriteria(BackoffPolicy.LINEAR, Duration.ofSeconds(20))//每次重试间隔N*20sec
             .build()
 
