@@ -110,8 +110,7 @@ dependencies {
     kapt "androidx.hilt:hilt-compiler:$hilt_lifecycle_ver"
 
     // 使用 Hilt 注入 WorkManager
-    implementation "androidx.hilt:hilt-work:$hilt_lifecycle_ver"
-    // When using Kotlin.
-    kapt "androidx.hilt:hilt-compiler:$hilt_lifecycle_ver"
+    def hilt_work_ver = "1.0.0"
+    implementation "androidx.hilt:hilt-work:$hilt_work_ver"
 
 }

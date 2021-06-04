@@ -1,9 +1,12 @@
 package com.apm29.phantomcompose
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -14,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.findNavController
+import com.apm29.phantomcompose.ext.CoroutineScopeContext
 import com.apm29.phantomcompose.route.Routes
 import com.apm29.phantomcompose.ui.contact.ContactsScreen
 import com.apm29.phantomcompose.ui.dashboard.DashboardScreen
@@ -23,11 +27,26 @@ import com.apm29.phantomcompose.ui.sample.Todo
 import com.apm29.phantomcompose.ui.sample.TodoScreen
 import com.apm29.phantomcompose.ui.theme.PhantomComposeTheme
 import com.apm29.phantomcompose.ui.visitor.VisitorRecordScreen
-import com.apm29.phantomcompose.vm.ContactViewModel
-import com.apm29.phantomcompose.vm.TodoViewModel
-import com.apm29.phantomcompose.vm.VisitorViewModel
+import com.apm29.phantomcompose.vm.*
+import dagger.hilt.android.AndroidEntryPoint
 
-class ComposeFragment : Fragment() {
+
+@AndroidEntryPoint
+class ComposeFragment : Fragment(), CoroutineScopeContext {
+
+    private val qrCodeViewModel:QRCodeViewModel by viewModels()
+
+    private val launcher: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == 0) {
+            val qrcode: String? = result.data?.getStringExtra("qrCode")
+            qrCodeViewModel.setCode(qrcode)
+        } else {
+            qrCodeViewModel.setCode(null)
+        }
+    }
+
 
     @ExperimentalComposeUiApi
     @ExperimentalFoundationApi
@@ -45,6 +64,7 @@ class ComposeFragment : Fragment() {
             val contactViewModel: ContactViewModel by viewModels {
                 ContactViewModel.ContactsViewModelFactory()
             }
+            val workViewModel: WorkViewModel by viewModels()
             val fragmentNavController = findNavController()
             setContent {
                 val navController = rememberNavController()
@@ -57,7 +77,13 @@ class ComposeFragment : Fragment() {
                                 },
                                 {
                                     fragmentNavController.navigate(it)
-                                }
+                                },
+                                {
+                                    val intent = Intent()
+                                    intent.setClassName("com.telpo.tps550.api", "com.telpo.tps550.api.barcode.Capture")
+                                    launcher.launch(intent)
+                                },
+                                workViewModel.syncWorkerState
                             )
                         }
                         composable(Routes.EnterRegister) {

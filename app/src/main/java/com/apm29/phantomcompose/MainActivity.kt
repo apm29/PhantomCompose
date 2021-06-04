@@ -7,8 +7,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.findNavController
 import com.apm29.phantomcompose.ext.doRequestPermissions
-import com.apm29.phantomcompose.work.operation.ContactOperations
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
@@ -21,7 +21,5 @@ class MainActivity : AppCompatActivity() {
         findNavController(R.id.main_activity_fragment_container)
         doRequestPermissions {
         }
-
-        ContactOperations(0L).startSync(this)
     }
 }
