@@ -72,24 +72,24 @@ class ComposeFragment : Fragment(), CoroutineScopeContext {
                     NavHost(navController = navController, startDestination = Routes.Dashboard) {
                         composable(route = Routes.Dashboard) {
                             DashboardScreen(
-                                {
+                                onNavigateCompose = {
                                     navController.navigate(it)
                                 },
-                                {
+                                onNavigateFragment = {
                                     fragmentNavController.navigate(it)
                                 },
-                                {
+                                onScanQrCode = {
                                     val intent = Intent()
                                     intent.setClassName("com.telpo.tps550.api", "com.telpo.tps550.api.barcode.Capture")
                                     launcher.launch(intent)
                                 },
-                                workViewModel.syncWorkerState
+                                syncWorkerState = workViewModel.syncWorkerState
                             )
                         }
                         composable(Routes.EnterRegister) {
                             EnterRegisterScreen(
-                                enterRegisterViewModel::onSubmitRegister,
-                                enterRegisterViewModel::onReject
+                                onAgree = enterRegisterViewModel::onSubmitRegister,
+                                onReject = enterRegisterViewModel::onReject
                             )
                         }
                         composable(Routes.LeaveRegister) {
@@ -97,34 +97,31 @@ class ComposeFragment : Fragment(), CoroutineScopeContext {
                         }
                         composable(Routes.Contact) {
                             ContactsScreen(
-                                contactViewModel.contactRecords,
-                                contactViewModel.hasMoreContacts,
-                                contactViewModel.loadingContacts,
-                            ) {
-                                contactViewModel.getContacts()
-                            }
+                                records = contactViewModel.contactRecords,
+                                hasMore = contactViewModel.hasMoreContacts,
+                                loading = contactViewModel.loadingContacts,
+                                onLoadMore = contactViewModel::getContacts,
+                            )
                         }
                         composable(Routes.VisitRecords) {
                             VisitorRecordScreen(
-                                enterRegisterViewModel.visitorRecords,
-                                enterRegisterViewModel.hasMoreVisitRecords,
-                                enterRegisterViewModel.loadingVisitRecords,
-                            ) {
-                                enterRegisterViewModel.getVisitRecords()
-                            }
+                                records = enterRegisterViewModel.visitorRecords,
+                                hasMore = enterRegisterViewModel.hasMoreVisitRecords,
+                                loading = enterRegisterViewModel.loadingVisitRecords,
+                                onLoadMore = enterRegisterViewModel::getVisitRecords,
+                            )
                         }
                         composable(Routes.VideoConf) {
                             EnterRegisterScreen(
-                                enterRegisterViewModel::onSubmitRegister,
-                                enterRegisterViewModel::onReject
+                                onAgree = enterRegisterViewModel::onSubmitRegister,
+                                onReject = enterRegisterViewModel::onReject
                             )
                         }
                         composable(Routes.Settings) {
-                            val todoList: List<Todo> = todoViewModel.todoList
                             TodoScreen(
-                                todoList,
-                                todoViewModel::addItem,
-                                todoViewModel::changeStatus,
+                                todoList =  todoViewModel.todoList,
+                                onAdd = todoViewModel::addItem,
+                                onChange = todoViewModel::changeStatus,
                             )
                         }
                     }
