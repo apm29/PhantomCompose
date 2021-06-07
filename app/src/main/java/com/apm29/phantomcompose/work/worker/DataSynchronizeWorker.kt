@@ -8,9 +8,11 @@ import android.widget.Toast
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.apm29.phantomcompose.api.TestApi
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
 
 @HiltWorker
 class DataSynchronizeWorker  @AssistedInject constructor(
@@ -28,6 +30,10 @@ class DataSynchronizeWorker  @AssistedInject constructor(
     override suspend fun doWork(): Result {
         Log.e(TAG, "START")
         val res = testApi.test()
+        (1..30000).forEach {
+            setProgress(workDataOf("progress" to it))
+            delay(10)
+        }
         toastAndLog(res.toString())
         Log.e(TAG, "FINISH")
         return Result.success()

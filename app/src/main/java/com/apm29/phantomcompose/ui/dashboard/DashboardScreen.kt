@@ -4,8 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -15,7 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
-import androidx.work.Operation
+import androidx.work.WorkInfo
 import com.apm29.phantomcompose.route.Routes
 import com.apm29.phantomcompose.ui.theme.*
 import com.apm29.phantomcompose.R
@@ -78,7 +77,7 @@ fun DashboardScreen(
     onNavigateCompose: (String) -> Unit,
     onNavigateFragment: (Int) -> Unit,
     onScanQrCode: () -> Unit,
-    syncWorkerState: LiveData<Operation.State>,
+    syncWorkerState: LiveData<MutableList<WorkInfo>>,
 ) {
     Scaffold(
         topBar = {
@@ -148,40 +147,76 @@ private fun DashboardContent(onNavigateCompose: (String) -> Unit) {
 
 
 @Composable
-fun BoxScope.SyncWorkerStateIndicator(syncWorkerState: LiveData<Operation.State>) {
-    val state = syncWorkerState.observeAsState()
-    Card(
-        modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(6.dp),
-        elevation = 12.dp
+fun BoxScope.SyncWorkerStateIndicator(syncWorkerState: LiveData<MutableList<WorkInfo>>) {
+    val value: State<MutableList<WorkInfo>?> = syncWorkerState.observeAsState()
+    Column(
+        modifier = Modifier.align(Alignment.TopEnd)
     ) {
-        Row(
-            modifier = Modifier.padding(18.dp, 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            when (state.value) {
-                is Operation.State.IN_PROGRESS -> {
-                    Text(text = "正在同步")
-                    CircularProgressIndicator()
-                }
-                is Operation.State.SUCCESS -> {
-                    Text(text = "同步成功")
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = "Success",
-                        tint = Color.Green
-                    )
-                }
-                is Operation.State.FAILURE -> {
-                    Text(text = "同步失败")
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "Success",
-                        tint = Color.Red
-                    )
+        value.value?.forEach {
+                workInfo->
+            Card(
+                modifier = Modifier
+                    .padding(6.dp),
+                elevation = 12.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(18.dp, 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    when (workInfo.state) {
+                        WorkInfo.State.ENQUEUED -> {
+                            Text(text = "进入同步队列")
+                            Icon(
+                                imageVector = Icons.Filled.Info,
+                                contentDescription = "ENQUEUED",
+                                tint = Color.Gray
+                            )
+                        }
+                        WorkInfo.State.RUNNING -> {
+                            ProgressContent(workInfo)
+                        }
+                        WorkInfo.State.SUCCEEDED -> {
+                            Text(text = "同步成功")
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = "SUCCEEDED",
+                                tint = Color.Green
+                            )
+                        }
+                        WorkInfo.State.FAILED -> {
+                            Text(text = "同步失败")
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "FAILED",
+                                tint = Color.Red
+                            )
+                        }
+                        WorkInfo.State.BLOCKED -> {
+                            Text(text = "等待同步")
+                            Icon(
+                                imageVector = Icons.Filled.History,
+                                contentDescription = "BLOCKED",
+                                tint = Color.Blue
+                            )
+                        }
+                        WorkInfo.State.CANCELLED -> {
+                            Text(text = "同步取消")
+                            Icon(
+                                imageVector = Icons.Filled.Cancel,
+                                contentDescription = "CANCELLED",
+                                tint = Color.Magenta
+                            )
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun RowScope.ProgressContent(workInfo: WorkInfo) {
+    Text(text = "正在同步")
+    val progress = workInfo.progress.getInt("progress", 0) ?: 0
+    CircularProgressIndicator(modifier = Modifier.size(24.dp), progress = progress / 30000F)
 }

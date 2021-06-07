@@ -23,7 +23,6 @@ import com.apm29.phantomcompose.ui.contact.ContactsScreen
 import com.apm29.phantomcompose.ui.dashboard.DashboardScreen
 import com.apm29.phantomcompose.ui.register.EnterRegisterScreen
 import com.apm29.phantomcompose.ui.register.LeaveRegisterScreen
-import com.apm29.phantomcompose.ui.sample.Todo
 import com.apm29.phantomcompose.ui.sample.TodoScreen
 import com.apm29.phantomcompose.ui.theme.PhantomComposeTheme
 import com.apm29.phantomcompose.ui.visitor.VisitorRecordScreen
