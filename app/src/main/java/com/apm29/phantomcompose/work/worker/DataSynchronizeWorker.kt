@@ -1,6 +1,8 @@
 package com.apm29.phantomcompose.work.worker
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.hilt.work.HiltWorker
@@ -21,6 +23,8 @@ class DataSynchronizeWorker  @AssistedInject constructor(
         Log.e(TAG, "INIT")
     }
 
+    private val handler = Handler(Looper.getMainLooper())
+
     override suspend fun doWork(): Result {
         Log.e(TAG, "START")
         val res = testApi.test()
@@ -30,7 +34,9 @@ class DataSynchronizeWorker  @AssistedInject constructor(
     }
 
     private fun toastAndLog(message: String) {
-        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        handler.post {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        }
         Log.e(TAG, message)
     }
 
