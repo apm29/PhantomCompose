@@ -10,3 +10,4 @@ rootProject.name = "PhantomCompose"
 include ':app'
 include ':arcface'
 include ':telpo'
+include ':arcfaceid'
