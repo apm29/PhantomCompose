@@ -30,7 +30,7 @@ class DataSynchronizeWorker  @AssistedInject constructor(
     override suspend fun doWork(): Result {
         Log.e(TAG, "START")
         val res = testApi.test()
-        (1..30000).forEach {
+        (1..3000).forEach {
             setProgress(workDataOf("progress" to it))
             delay(10)
         }

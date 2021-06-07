@@ -86,7 +86,7 @@ dependencies {
     def gsonVersion = '2.8.6'
     def okhttpLoggingVersion = '4.9.1'
     def retrofitVersion = '2.9.0'
-    def coroutinesVersion = '1.3.9'
+    def coroutinesVersion = rootProject.coroutines_version
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttpLoggingVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"

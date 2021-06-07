@@ -215,8 +215,8 @@ fun BoxScope.SyncWorkerStateIndicator(syncWorkerState: LiveData<MutableList<Work
 }
 
 @Composable
-private fun RowScope.ProgressContent(workInfo: WorkInfo) {
+private fun ProgressContent(workInfo: WorkInfo) {
     Text(text = "正在同步")
-    val progress = workInfo.progress.getInt("progress", 0) ?: 0
-    CircularProgressIndicator(modifier = Modifier.size(24.dp), progress = progress / 30000F)
+    val progress = workInfo.progress.getInt("progress", 0)
+    CircularProgressIndicator(modifier = Modifier.size(24.dp), progress = progress / 3000F)
 }

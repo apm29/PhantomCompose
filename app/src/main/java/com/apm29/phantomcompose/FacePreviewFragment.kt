@@ -1,13 +1,15 @@
 package com.apm29.phantomcompose
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,9 +21,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -32,7 +36,6 @@ import com.apm29.phantomcompose.model.FaceCommonInfo
 import com.apm29.phantomcompose.vm.FaceAttrViewModel
 import com.apm29.telpo.IdCardFragment
 import com.telpo.servicelibrary.IdcardMsg
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class FacePreviewFragment : Fragment(), CoroutineScopeContext {
@@ -73,8 +76,16 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
             mutableStateOf(false)
         }
 
-        var result by remember {
+        var idCardDetail by remember {
             mutableStateOf<IdcardMsg?>(null)
+        }
+        
+        var idCardAvatar by remember {
+            mutableStateOf<Bitmap?>(null)
+        }
+
+        var pass by remember {
+            mutableStateOf(false)
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -85,8 +96,18 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
                 FaceInfoList(modifier, faceAttrViewModel.faceSet, readIdCard = {
                     launch(coroutineIoContext) {
                         loading = true
-                        result = idCardFragment.checkIdCard()
-                        delay(1000)
+                        idCardDetail = idCardFragment.checkIdCard()
+
+                        idCardDetail?.let {
+                            val idCardAvatarResult =  idCardFragment.decodeIdImage(it)
+                            val face = BitmapFactory.decodeResource(resources, R.drawable.faces)
+                            pass = faceAttrPreviewFragment.commandStartRegister(
+                                face
+                            )
+                            idCardAvatar = idCardAvatarResult.copy(
+                                Bitmap.Config.ARGB_8888,false
+                            )
+                        }
                         loading = false
                         showResultDialog = true
                     }
@@ -137,7 +158,13 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
                         )
                     },
                     text = {
-                        Text("$result")
+                        Column {
+                            Text(text = pass.toString(),fontSize = 35.sp,color = Color.Magenta)
+                            Text(text = "$idCardDetail")
+                            idCardAvatar?.let {
+                                Image(bitmap = it.asImageBitmap(), contentDescription = "证件头像")
+                            }
+                        }
                     }
                 )
             }
