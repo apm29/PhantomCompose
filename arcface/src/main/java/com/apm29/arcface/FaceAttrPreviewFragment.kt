@@ -347,66 +347,66 @@ class FaceAttrPreviewFragment(
 
     override suspend fun commandStartRegister(idCardAvatar: Bitmap): Boolean {
         inProcessOfRegister = true
-        try {
-            val faceFeature = getFirstValidFaceFeature()
-
-            // 图像对齐
-            // 图像对齐
-            val bitmap = ArcSoftImageUtil.getAlignedBitmap(idCardAvatar, false)
-            val width = bitmap.width
-            val height = bitmap.height
-            val bgr24 =
-                ArcSoftImageUtil.createImageData(
-                    bitmap.width,
-                    bitmap.height,
-                    ArcSoftImageFormat.BGR24
-                )
-            val transformCode =
-                ArcSoftImageUtil.bitmapToImageData(bitmap, bgr24, ArcSoftImageFormat.BGR24)
-            if (transformCode != ArcSoftImageUtilError.CODE_SUCCESS) {
-                Log.e(logTag, "转换失败: $transformCode")
-                return false
-            }
-            val faceInfoList: List<FaceInfo> = arrayListOf()
-            var detectCode = -1
-            while (detectCode != ErrorInfo.MOK) {
-                detectCode = imageFaceEngine.detectFaces(
-                    bgr24,
-                    width,
-                    height,
-                    FaceEngine.CP_PAF_BGR24,
-                    DetectModel.RGB,
-                    faceInfoList
-                )
-                Log.e(logTag, "人脸检测: $detectCode")
-            }
-            if (faceInfoList.isNullOrEmpty()) {
-                Log.e(logTag, "人脸检测失败: ${faceInfoList.size}")
-                return false
-            }
-            //保留最大人脸
-            val idFaceInfo = keepMaxFace(faceInfoList)
-            val idFaceFeature = getFaceFeatureInfo(
-                bgr24, idFaceInfo, width, height, FaceEngine.CP_PAF_BGR24
-            )
-
-            if (idFaceFeature == null) {
-                Log.e(logTag, "人脸特征为空")
-                return false
-            }
-
-
-            val matching = FaceSimilar()
-
-            faceFeatureEngine.compareFaceFeature(
-                faceFeature, idFaceFeature, CompareModel.ID_CARD, matching
-            )
-
-            Log.e(logTag, "比对结果：${matching.score}")
-            return matching.score >= 0.82
+        val faceFeature = try {
+            getFirstValidFaceFeature()
         } finally {
             inProcessOfRegister = false
         }
+        // 图像对齐
+        // 图像对齐
+        val bitmap = ArcSoftImageUtil.getAlignedBitmap(idCardAvatar, false)
+        val width = bitmap.width
+        val height = bitmap.height
+        val bgr24 =
+            ArcSoftImageUtil.createImageData(
+                bitmap.width,
+                bitmap.height,
+                ArcSoftImageFormat.BGR24
+            )
+        val transformCode =
+            ArcSoftImageUtil.bitmapToImageData(bitmap, bgr24, ArcSoftImageFormat.BGR24)
+        if (transformCode != ArcSoftImageUtilError.CODE_SUCCESS) {
+            Log.e(logTag, "转换失败: $transformCode")
+            return false
+        }
+        val faceInfoList: List<FaceInfo> = arrayListOf()
+        var detectCode = -1
+        while (detectCode != ErrorInfo.MOK) {
+            detectCode = imageFaceEngine.detectFaces(
+                bgr24,
+                width,
+                height,
+                FaceEngine.CP_PAF_BGR24,
+                DetectModel.RGB,
+                faceInfoList
+            )
+            Log.e(logTag, "人脸检测: $detectCode")
+        }
+        if (faceInfoList.isNullOrEmpty()) {
+            Log.e(logTag, "人脸检测失败: ${faceInfoList.size}")
+            return false
+        }
+        //保留最大人脸
+        val idFaceInfo = keepMaxFace(faceInfoList)
+        val idFaceFeature = getFaceFeatureInfo(
+            bgr24, idFaceInfo, width, height, FaceEngine.CP_PAF_BGR24
+        )
+
+        if (idFaceFeature == null) {
+            Log.e(logTag, "人脸特征为空")
+            return false
+        }
+
+
+        val matching = FaceSimilar()
+
+        faceFeatureEngine.compareFaceFeature(
+            faceFeature, idFaceFeature, CompareModel.ID_CARD, matching
+        )
+
+        Log.e(logTag, "比对结果：${matching.score}")
+        return matching.score >= 0.82
+
     }
 
     private suspend fun getFirstValidFaceFeature() = nv21DataFlow
@@ -423,8 +423,21 @@ class FaceAttrPreviewFragment(
                 FaceEngine.CP_PAF_NV21,
                 faceInfoList
             )
+            val drawInfoList = faceInfoList.mapIndexed { i, faceInfo ->
+                DrawInfo(
+                    drawHelper?.adjustRect(faceInfo.rect),
+                    -1,
+                    0,
+                    -1,
+                    RecognizeColor.COLOR_SUCCESS,
+                    "识别中"
+                )
+            }
+            drawHelper?.draw(faceRectView, drawInfoList)
             faceInfoList to it
-        }.filter {
+        }
+        .flowOn(Dispatchers.Main)
+        .filter {
             it.first.isNotEmpty()
         }.map {
             getFaceFeatureInfo(
@@ -433,7 +446,8 @@ class FaceAttrPreviewFragment(
                 previewSize.width,
                 previewSize.height
             )
-        }.flowOn(Dispatchers.IO)
+        }
+        .flowOn(Dispatchers.IO)
         .filterNotNull()
         .first()
 
