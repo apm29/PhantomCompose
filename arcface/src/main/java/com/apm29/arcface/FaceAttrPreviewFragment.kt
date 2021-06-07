@@ -348,33 +348,7 @@ class FaceAttrPreviewFragment(
     override suspend fun commandStartRegister(idCardAvatar: Bitmap): Boolean {
         inProcessOfRegister = true
         try {
-            val faceFeature = nv21DataFlow
-                .onStart {
-                    Log.e(logTag, "开始筛选")
-                }.onCompletion {
-                    Log.e(logTag, "筛选完成")
-                }.map {
-                    val faceInfoList = arrayListOf<FaceInfo>()
-                    videoFaceEngine.detectFaces(
-                        it,
-                        previewSize.width,
-                        previewSize.height,
-                        FaceEngine.CP_PAF_NV21,
-                        faceInfoList
-                    )
-                    faceInfoList to it
-                }.filter {
-                    it.first.isNotEmpty()
-                }.map {
-                    getFaceFeatureInfo(
-                        it.second,
-                        it.first.first(),
-                        previewSize.width,
-                        previewSize.height
-                    )
-                }.flowOn(Dispatchers.IO)
-                .filterNotNull()
-                .first()
+            val faceFeature = getFirstValidFaceFeature()
 
             // 图像对齐
             // 图像对齐
@@ -395,7 +369,7 @@ class FaceAttrPreviewFragment(
             }
             val faceInfoList: List<FaceInfo> = arrayListOf()
             var detectCode = -1
-            while (detectCode != ErrorInfo.MOK){
+            while (detectCode != ErrorInfo.MOK) {
                 detectCode = imageFaceEngine.detectFaces(
                     bgr24,
                     width,
@@ -406,14 +380,14 @@ class FaceAttrPreviewFragment(
                 )
                 Log.e(logTag, "人脸检测: $detectCode")
             }
-            if ( faceInfoList.isNullOrEmpty()) {
+            if (faceInfoList.isNullOrEmpty()) {
                 Log.e(logTag, "人脸检测失败: ${faceInfoList.size}")
                 return false
             }
             //保留最大人脸
             val idFaceInfo = keepMaxFace(faceInfoList)
             val idFaceFeature = getFaceFeatureInfo(
-                bgr24, idFaceInfo, width, height,  FaceEngine.CP_PAF_BGR24
+                bgr24, idFaceInfo, width, height, FaceEngine.CP_PAF_BGR24
             )
 
             if (idFaceFeature == null) {
@@ -434,6 +408,34 @@ class FaceAttrPreviewFragment(
             inProcessOfRegister = false
         }
     }
+
+    private suspend fun getFirstValidFaceFeature() = nv21DataFlow
+        .onStart {
+            Log.e(logTag, "开始筛选")
+        }.onCompletion {
+            Log.e(logTag, "筛选完成")
+        }.map {
+            val faceInfoList = arrayListOf<FaceInfo>()
+            videoFaceEngine.detectFaces(
+                it,
+                previewSize.width,
+                previewSize.height,
+                FaceEngine.CP_PAF_NV21,
+                faceInfoList
+            )
+            faceInfoList to it
+        }.filter {
+            it.first.isNotEmpty()
+        }.map {
+            getFaceFeatureInfo(
+                it.second,
+                it.first.first(),
+                previewSize.width,
+                previewSize.height
+            )
+        }.flowOn(Dispatchers.IO)
+        .filterNotNull()
+        .first()
 
     private fun keepMaxFace(ftFaceList: List<FaceInfo>?): FaceInfo {
         if (ftFaceList.isNullOrEmpty()) {
