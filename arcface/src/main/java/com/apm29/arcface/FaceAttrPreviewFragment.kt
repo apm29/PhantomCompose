@@ -81,6 +81,30 @@ class FaceAttrPreviewFragment(
         faceEngine
     }
 
+
+    /**
+     * 用于特征提取的引擎
+     */
+    private val faceFeatureEngine: FaceEngine by lazy {
+        val faceEngine = FaceEngine()
+        val afCode = faceEngine.init(
+            requireContext(),
+            DetectMode.ASF_DETECT_MODE_IMAGE,
+            DetectFaceOrientPriority.ASF_OP_0_ONLY,
+            16,
+            10,
+            FaceEngine.ASF_FACE_RECOGNITION
+        )
+        Log.i(logTag, "initEngine:  init: $afCode")
+        if (afCode != ErrorInfo.MOK) {
+            Log.e(logTag, "初始化引擎失败:$afCode")
+        }
+        faceEngine
+    }
+
+    /**
+     * 用于身份证照片检测的引擎
+     */
     private val imageFaceEngine: FaceEngine by lazy {
         val faceEngine = FaceEngine()
         val afCode = faceEngine.init(
@@ -108,25 +132,6 @@ class FaceAttrPreviewFragment(
     private lateinit var faceRectView: FaceRectView
 
 
-    /**
-     * 用于特征提取的引擎
-     */
-    private val faceFeatureEngine: FaceEngine by lazy {
-        val faceEngine = FaceEngine()
-        val afCode = faceEngine.init(
-            requireContext(),
-            DetectMode.ASF_DETECT_MODE_IMAGE,
-            DetectFaceOrientPriority.ASF_OP_0_ONLY,
-            16,
-            10,
-            FaceEngine.ASF_FACE_RECOGNITION
-        )
-        Log.i(logTag, "initEngine:  init: $afCode")
-        if (afCode != ErrorInfo.MOK) {
-            Log.e(logTag, "初始化引擎失败:$afCode")
-        }
-        faceEngine
-    }
 
     /**
      * 数据流
@@ -345,7 +350,7 @@ class FaceAttrPreviewFragment(
 
     private var inProcessOfRegister = false
 
-    override suspend fun commandStartRegister(idCardAvatar: Bitmap): Boolean {
+    override suspend fun commandStartRegister(idCardAvatar: Bitmap): FaceCommand.CompareResult {
         inProcessOfRegister = true
         val faceFeature = try {
             getFirstValidFaceFeature()
@@ -366,8 +371,9 @@ class FaceAttrPreviewFragment(
         val transformCode =
             ArcSoftImageUtil.bitmapToImageData(bitmap, bgr24, ArcSoftImageFormat.BGR24)
         if (transformCode != ArcSoftImageUtilError.CODE_SUCCESS) {
-            Log.e(logTag, "转换失败: $transformCode")
-            return false
+            val errorMessage = "转换失败: $transformCode"
+            Log.e(logTag, errorMessage)
+            return FaceCommand.CompareResult.Error(errorMessage)
         }
         val faceInfoList: List<FaceInfo> = arrayListOf()
         var detectCode = -1
@@ -383,8 +389,9 @@ class FaceAttrPreviewFragment(
             Log.e(logTag, "人脸检测: $detectCode")
         }
         if (faceInfoList.isNullOrEmpty()) {
-            Log.e(logTag, "人脸检测失败: ${faceInfoList.size}")
-            return false
+            val errorMessage = "人脸检测失败: ${faceInfoList.size}"
+            Log.e(logTag, errorMessage)
+            return FaceCommand.CompareResult.Error(errorMessage)
         }
         //保留最大人脸
         val idFaceInfo = keepMaxFace(faceInfoList)
@@ -393,8 +400,9 @@ class FaceAttrPreviewFragment(
         )
 
         if (idFaceFeature == null) {
-            Log.e(logTag, "人脸特征为空")
-            return false
+            val errorMessage = "人脸特征为空"
+            Log.e(logTag, errorMessage)
+            return FaceCommand.CompareResult.Error(errorMessage)
         }
 
 
@@ -405,7 +413,9 @@ class FaceAttrPreviewFragment(
         )
 
         Log.e(logTag, "比对结果：${matching.score}")
-        return matching.score >= 0.82
+        return FaceCommand.CompareResult.Success(
+            matching,idFaceFeature,faceFeature
+        )
 
     }
 

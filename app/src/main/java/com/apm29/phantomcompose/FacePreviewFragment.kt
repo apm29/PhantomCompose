@@ -27,14 +27,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import com.apm29.arcface.FaceAttrPreviewFragment
+import com.apm29.arcface.FaceCommand
 import com.apm29.phantomcompose.ext.CoroutineScopeContext
 import com.apm29.phantomcompose.model.FaceCommonInfo
 import com.apm29.phantomcompose.vm.FaceAttrViewModel
 import com.apm29.telpo.IdCardFragment
+import com.apm29.telpo.utils.asText
 import com.telpo.servicelibrary.IdcardMsg
 import kotlinx.coroutines.launch
 
@@ -79,13 +82,13 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
         var idCardDetail by remember {
             mutableStateOf<IdcardMsg?>(null)
         }
-        
+
         var idCardAvatar by remember {
             mutableStateOf<Bitmap?>(null)
         }
 
-        var pass by remember {
-            mutableStateOf(false)
+        var compareResult by remember {
+            mutableStateOf<FaceCommand.CompareResult?>(null)
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -99,13 +102,13 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
                         idCardDetail = idCardFragment.checkIdCard()
 
                         idCardDetail?.let {
-                            val idCardAvatarResult =  idCardFragment.decodeIdImage(it)
+                            val idCardAvatarResult = idCardFragment.decodeIdImage(it)
                             val face = BitmapFactory.decodeResource(resources, R.drawable.faces)
-                            pass = faceAttrPreviewFragment.commandStartRegister(
+                            compareResult = faceAttrPreviewFragment.commandStartRegister(
                                 face
                             )
                             idCardAvatar = idCardAvatarResult.copy(
-                                Bitmap.Config.ARGB_8888,false
+                                Bitmap.Config.ARGB_8888, false
                             )
                         }
                         loading = false
@@ -148,25 +151,27 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
             }
 
             if (showResultDialog) {
-                AlertDialog(
-                    modifier = Modifier.widthIn(180.dp),
+                Dialog(
                     onDismissRequest = { showResultDialog = false },
-                    buttons = {},
-                    title = {
-                        Text(
-                            text = "识别结果"
-                        )
-                    },
-                    text = {
-                        Column {
-                            Text(text = pass.toString(),fontSize = 35.sp,color = Color.Magenta)
-                            Text(text = "$idCardDetail")
+                ){
+                    Card {
+                        Column(
+                            Modifier.padding(16.dp)
+                        ) {
                             idCardAvatar?.let {
                                 Image(bitmap = it.asImageBitmap(), contentDescription = "证件头像")
                             }
+                            compareResult?.let {
+                                Text(
+                                    text = if (it.errorMessage.isNotBlank()) it.errorMessage else "相似度：${it.similar.score}",
+                                    fontSize = 35.sp,
+                                    color = Color.Magenta
+                                )
+                            }
+                            Text(text = "${idCardDetail?.asText()}")
                         }
                     }
-                )
+                }
             }
         }
     }

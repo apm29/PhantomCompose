@@ -18,7 +18,7 @@ class WorkViewModel @Inject constructor(
     val testApi: TestApi, @ApplicationContext context: Context
 ) : ViewModel() {
     private val contactOperations = ContactOperations(0L)
-    private val syncOperation: Operation = contactOperations.startSync(context)
+    private val syncOperation: Operation = contactOperations.syncOnce(context)
 
     private val workManager: WorkManager = WorkManager.getInstance(context)
 

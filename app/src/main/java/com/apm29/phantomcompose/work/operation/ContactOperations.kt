@@ -21,6 +21,11 @@ class ContactOperations(
             .setBackoffCriteria(BackoffPolicy.LINEAR, Duration.ofSeconds(10))//每次重试间隔N*20sec
             .build()
 
+    private val oneTimeWorkRequest: OneTimeWorkRequest = OneTimeWorkRequestBuilder<DataSynchronizeWorker>()
+        .setInitialDelay(Duration.ofSeconds(10))
+        .setBackoffCriteria(BackoffPolicy.LINEAR, Duration.ofSeconds(10))//每次重试间隔N*20sec
+        .build()
+
 
     val uniqueWorkName = "sync"
 
@@ -32,6 +37,14 @@ class ContactOperations(
             uniqueWorkName,
             ExistingPeriodicWorkPolicy.REPLACE,
             periodicWorkRequest,
+        )
+    }
+
+    fun syncOnce(context: Context):Operation{
+        return WorkManager.getInstance(context).enqueueUniqueWork(
+            uniqueWorkName,
+            ExistingWorkPolicy.REPLACE,
+            oneTimeWorkRequest
         )
     }
 }
