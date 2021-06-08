@@ -241,6 +241,7 @@ public class CameraHelper implements Camera.PreviewCallback {
                 }
             }
         }
+        Log.e("BEST SIZE","width:"+bestSize.width + " -- height:"+bestSize.height);
         return bestSize;
     }
 

@@ -92,10 +92,36 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxSize(),
+                factory = { context ->
+                    FrameLayout(context).apply {
+                        id = R.id.id_fragment_face_preview
+                        childFragmentManager.commit {
+                            add(R.id.id_fragment_face_preview, faceAttrPreviewFragment)
+                        }
+                    }
+                },
+            )
+            AndroidView(
+                modifier = Modifier
+                    .width(0.dp)
+                    .height(0.dp),
+                factory = { context ->
+                    // Creates custom view
+                    FrameLayout(context).apply {
+                        id = R.id.id_fragment_id_card_detect
+                        childFragmentManager.commit {
+                            add(R.id.id_fragment_id_card_detect, idCardFragment)
+                        }
+                    }
+                },
+            )
             Row {
                 val modifier = Modifier
                     .fillMaxHeight()
-                    .weight(1f)
+                    .aspectRatio(0.6f,true)
                 FaceInfoList(modifier, faceAttrViewModel.faceSet, readIdCard = {
                     launch(coroutineIoContext) {
                         loading = true
@@ -103,9 +129,8 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
 
                         idCardDetail?.let {
                             val idCardAvatarResult = idCardFragment.decodeIdImage(it)
-                            val face = BitmapFactory.decodeResource(resources, R.drawable.faces)
                             compareResult = faceAttrPreviewFragment.commandStartRegister(
-                                face
+                                idCardAvatarResult
                             )
                             idCardAvatar = idCardAvatarResult.copy(
                                 Bitmap.Config.ARGB_8888, false
@@ -115,36 +140,6 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
                         showResultDialog = true
                     }
                 })
-                AndroidView(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(
-                            1.2f,
-                            true
-                        ),
-                    factory = { context ->
-                        FrameLayout(context).apply {
-                            id = R.id.id_fragment_face_preview
-                            childFragmentManager.commit {
-                                add(R.id.id_fragment_face_preview, faceAttrPreviewFragment)
-                            }
-                        }
-                    },
-                )
-                AndroidView(
-                    modifier = Modifier
-                        .width(0.dp)
-                        .height(0.dp),
-                    factory = { context ->
-                        // Creates custom view
-                        FrameLayout(context).apply {
-                            id = R.id.id_fragment_id_card_detect
-                            childFragmentManager.commit {
-                                add(R.id.id_fragment_id_card_detect, idCardFragment)
-                            }
-                        }
-                    },
-                )
             }
             if (loading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -168,7 +163,10 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
                                     color = Color.Magenta
                                 )
                             }
-                            Text(text = "${idCardDetail?.asText()}")
+                            idCardDetail?.let {
+                                Text(text = it.asText())
+                            }?: Text(text = "身份证读取失败")
+
                         }
                     }
                 }
@@ -190,7 +188,6 @@ class FacePreviewFragment : Fragment(), CoroutineScopeContext {
         ) {
             LazyColumn(
                 modifier = Modifier
-                    .background(color = Color.LightGray)
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

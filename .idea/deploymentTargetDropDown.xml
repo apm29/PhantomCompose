@@ -7,11 +7,11 @@
         <deviceKey>
           <Key>
             <type value="SERIAL_NUMBER" />
-            <value value="192.168.10.17:5566" />
+            <value value="d" />
           </Key>
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2021-06-03T08:02:47.653805Z" />
+    <timeTargetWasSelectedWithDropDown value="2021-06-08T02:08:55.243845Z" />
   </component>
 </project>
